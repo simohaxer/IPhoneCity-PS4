@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" manifest="cache.appcache">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PS4 Exploit - iPhone City</title>
+<style>
+  :root {
+    --bg:#06090f;
+    --card:rgba(8,12,18,.76);
+    --line:rgba(65,165,255,.28);
+    --text:#edf2ff;
+    --muted:#b7c4d8;
+    --blue:#27b0ff;
+    --yellow:#ffd32a;
+    --ok:#8ef2ae;
+    --warn:#ffe07f;
+    --bad:#ff9b96;
+  }
+  * { box-sizing:border-box; }
+  html, body { min-height:100%; margin:0; }
+  body {
+    font:15px/1.45 "Segoe UI", system-ui, sans-serif;
+    color:var(--text);
+    background:
+      linear-gradient(rgba(3,7,12,.82), rgba(3,7,12,.92)),
+      url("loadingpro_splash.png") center/cover no-repeat fixed;
+  }
+  body::before {
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(39,176,255,.16), transparent 38%),
+      radial-gradient(circle at 82% 80%, rgba(255,211,42,.16), transparent 32%);
+    pointer-events:none;
+  }
+  #splash {
+    position:fixed; inset:0; z-index:30;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      linear-gradient(rgba(2,5,9,.4), rgba(2,5,9,.55)),
+      url("loadingpro_splash.png") center/cover no-repeat;
+    transition:opacity .65s ease, visibility .65s ease;
+  }
+  body.loaded #splash { opacity:0; visibility:hidden; }
+  .splash-card {
+    width:min(92vw, 540px);
+    background:rgba(6,10,16,.52);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:24px;
+    padding:28px 24px 24px;
+    text-align:center;
+    box-shadow:0 18px 55px rgba(0,0,0,.35);
+    backdrop-filter: blur(6px);
+  }
+  .splash-card img { 
+    max-width:210px; 
+    width:65%; 
+    display:block; 
+    margin:0 auto 16px; 
+    background:#ffffff;
+    padding:10px 18px;
+    border-radius:18px;
+    box-shadow:0 4px 18px rgba(0,0,0,.5);
+  }
+  .splash-card h1 {
+    margin:0; font-size:clamp(26px, 4.5vw, 44px); letter-spacing:.06em;
+    font-weight:900; text-transform:uppercase;
+  }
+  .splash-card h1 span:first-child {
+    background:linear-gradient(180deg,#ffffff,#b8c0cf);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .splash-card h1 span:last-child {
+    background:linear-gradient(180deg,#ffe96a,#ffbb00);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .splash-sub { color:#d7e1f2; letter-spacing:.15em; font-size:13px; margin:8px 0 18px; }
+  .loader-track {
+    height:14px; width:min(100%, 340px); margin:0 auto; border-radius:999px;
+    border:1px solid rgba(255,255,255,.16); padding:2px;
+    background:rgba(0,0,0,.35);
+    box-shadow:inset 0 0 18px rgba(0,0,0,.4);
+  }
+  .loader-bar {
+    height:100%; width:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--blue), #57d0ff 45%, var(--yellow) 100%);
+    transform-origin:left center; animation:barload 2.15s ease-in-out forwards;
+    box-shadow:0 0 18px rgba(39,176,255,.45), 0 0 18px rgba(255,211,42,.3);
+  }
+  @keyframes barload { from { transform:scaleX(.06);} to { transform:scaleX(1);} }
+  #page {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  #panel {
+    width:min(92vw, 640px);
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:26px;
+    padding:22px 22px 18px;
+    box-shadow:0 18px 55px rgba(0,0,0,.34);
+    backdrop-filter:blur(10px);
+  }
+  #brand {
+    display:flex; align-items:center; gap:14px; margin-bottom:18px;
+    padding-bottom:14px; border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  #brand img { 
+    height:50px; 
+    width:auto; 
+    max-width:130px; 
+    background:#ffffff; 
+    border-radius:10px; 
+    padding:4px 8px; 
+    object-fit:contain; 
+    box-shadow:0 2px 10px rgba(0,0,0,.4);
+  }
+  .brand-text b {
+    display:block; font-size:24px; line-height:1.1; letter-spacing:.05em; font-weight:900;
+  }
+  .brand-text b span:first-child {
+    background:linear-gradient(180deg,#ffffff,#b7bfcd);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand-text b span:last-child {
+    background:linear-gradient(180deg,#ffe96a,#ffbb00);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand-text small {
+    display:block; margin-top:5px; color:var(--muted); font-size:12px;
+  }
+  #state { font-size:24px; font-weight:800; margin:0 0 8px; }
+  #det, #cache { color:var(--muted); margin:0 0 7px; }
+  #cache.cacheok { color:var(--ok); }
+  #out {
+    margin-top:16px; min-height:60px; padding:14px 16px; border-radius:16px;
+    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+    white-space:pre-wrap; overflow-wrap:anywhere;
+  }
+  .ok { color:var(--ok); } .bad { color:var(--bad); } .warn { color:var(--warn); }
+  
+  .credit-box {
+    margin-top:16px;
+    padding-top:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    color:var(--muted);
+    direction:rtl;
+  }
+  .credit-box .phone-badge {
+    color:#00FF00;
+    font-weight:bold;
+    direction:ltr;
+  }
+
+  @media (max-width:640px){
+    #panel{ padding:18px 16px; border-radius:22px; }
+    .brand-text b{ font-size:20px; }
+    #state{ font-size:21px; }
+    .credit-box{ flex-direction:column; gap:6px; text-align:center; }
+  }
+</style>
+</head>
+<body>
+<div id="splash" aria-hidden="true">
+  <div class="splash-card">
+    <img src="logo.png" alt="iPhone City logo">
+    <h1><span>IPHONE</span> <span>CITY</span></h1>
+    <div class="splash-sub">آيفون سيتي للأجهزة الذكية - الحديدة شارع صنعاء</div>
+    <div class="loader-track"><div class="loader-bar"></div></div>
+  </div>
+</div>
+<div id="page">
+  <div id="panel">
+    <div id="brand">
+      <img src="logo.png" alt="iPhone City logo">
+      <div class="brand-text">
+        <b><span>IPHONE</span> <span>CITY</span></b>
+        <small>الحديدة - شارع صنعاء | هاتف: 777102029</small>
+      </div>
+    </div>
+    <div id="state">Preparing launcher...</div>
+    <div id="det">Checking local files and startup state.</div>
+    <div id="cache">Initializing cache...</div>
+    <div id="out"></div>
+
+    <div class="credit-box">
+      <span>تصميم وبرمجة: المهندس أسامة مهدي - خصيصاً لمحل آيفون سيتي</span>
+      <span class="phone-badge">777102029 | 777771049</span>
+    </div>
+  </div>
+</div>
+<script>
+  window.addEventListener('load', () => setTimeout(() => document.body.classList.add('loaded'), 2200));
+  setTimeout(() => document.body.classList.add('loaded'), 2800);
+</script>
+<script type="module">
+  import "./jb.js?v=11";
+</script>
+</body>
+</html>
